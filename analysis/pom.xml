@@ -42,9 +42,9 @@
     </dependency>
     <!-- Source: https://mvnrepository.com/artifact/spoon/spoon -->
     <dependency>
-      <groupId>fr.inria.gforge.spoon</groupId>
-      <artifactId>spoon-core</artifactId>
-      <version>10.4.0</version>
+        <groupId>fr.inria.gforge.spoon</groupId>
+        <artifactId>spoon-core</artifactId>
+        <version>11.3.0</version>
     </dependency>
   </dependencies>
 
