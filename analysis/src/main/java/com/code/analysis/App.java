@@ -62,4 +62,11 @@ public class App {
         // System.out.println(String.format("Edge: %d; Node: %d;", edgeCount, nodeCount));
         return ((double) edgeCount) / (nodeCount * nodeCount);
     }
+
+    private static double computeInterconnectivity(CtPackage pckA, CtPackage pckB) {
+        Set<CtType<?>> typesA = pckA.getTypes();
+        Set<CtType<?>> typesB = pckB.getTypes();
+        return 0;
+    }
+
 }
