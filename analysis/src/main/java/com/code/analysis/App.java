@@ -34,6 +34,13 @@ public class App {
             double intraconnectivity = computeIntraconnectivity(pck);
             System.out.println(String.format("Package %s has intra-connectivity %.2f", pck.getSimpleName(), intraconnectivity));
         }    
+
+        for (CtPackage pckA : packages) {
+            for (CtPackage pckB : packages) {
+                double interconnectivity = computeInterconnectivity(pckA, pckB);
+                System.out.println(String.format("Package %s and %s has interconnectivity %.2f", pckA.getSimpleName(), pckB.getSimpleName(), interconnectivity));
+            }
+        }
     }
 
     private static double computeIntraconnectivity(CtPackage pck) {
@@ -64,9 +71,32 @@ public class App {
     }
 
     private static double computeInterconnectivity(CtPackage pckA, CtPackage pckB) {
-        Set<CtType<?>> typesA = pckA.getTypes();
-        Set<CtType<?>> typesB = pckB.getTypes();
-        return 0;
+        List<CtType> typesA = pckA.getElements(new TypeFilter<>(CtType.class)).stream().filter(t -> !t.isAnonymous()).toList();
+        List<CtType> typesB = pckB.getElements(new TypeFilter<>(CtType.class)).stream().filter(t -> !t.isAnonymous()).toList();
+
+        if (pckA.equals(pckB)) {
+            return 0;
+        }
+        int interEdgeCount = 0;
+        for (CtType<?> type : typesA ) {
+            
+            Set<CtTypeReference<?>> internalReferences = type.getReferencedTypes().stream()
+            .filter(r -> !r.isPrimitive()) // No primitive types
+            .filter(r -> r.getTypeDeclaration() != null && r.getTypeDeclaration().getPackage() != null) // Null pointer prevention
+            .filter(r -> r.getTypeDeclaration().getPackage().getQualifiedName().startsWith(pckB.getQualifiedName())) // Internal reference check
+            .filter(r -> typesB.stream().anyMatch(t -> r.getDeclaration().equals(t)))
+            .collect(Collectors.toSet());
+            // 
+            // System.out.println(String.format("Type %s references: ", type.getQualifiedName()));
+            // internalReferences.forEach(r -> System.out.println(String.format("    %s", r.getQualifiedName())));
+
+            interEdgeCount += internalReferences.size();
+        }
+
+        int nodeCountA = typesA.size();
+        int nodeCountB = typesB.size();
+        
+        return ((double) interEdgeCount / (2 * nodeCountA * nodeCountB));
     }
 
 }
