@@ -41,6 +41,9 @@ public class App {
                 System.out.println(String.format("Package %s and %s has interconnectivity %.2f", pckA.getSimpleName(), pckB.getSimpleName(), interconnectivity));
             }
         }
+
+        double modularQuality = computeModularQuality(packages);
+        System.out.println(String.format("Modular quality is %.2f", modularQuality));
     }
 
     private static double computeIntraconnectivity(CtPackage pck) {
@@ -97,6 +100,25 @@ public class App {
         int nodeCountB = typesB.size();
         
         return ((double) interEdgeCount / (2 * nodeCountA * nodeCountB));
+    }
+
+    private static double computeModularQuality(Collection<CtPackage> packages) {
+        double intraconnectivityMean = 0;
+        for (CtPackage p : packages) {
+            intraconnectivityMean += computeIntraconnectivity(p);
+        }
+        intraconnectivityMean = intraconnectivityMean / packages.size();
+
+        double interconnectivityMean = 0;
+        for (CtPackage a : packages) {
+            for (CtPackage b : packages) {
+                interconnectivityMean  += computeInterconnectivity(a, b);
+            }
+        }
+
+        interconnectivityMean = interconnectivityMean / ((packages.size() * (packages.size() - 1)) / 2);
+
+        return intraconnectivityMean - interconnectivityMean;
     }
 
 }
