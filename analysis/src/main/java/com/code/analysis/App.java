@@ -96,6 +96,21 @@ public class App {
             interEdgeCount += internalReferences.size();
         }
 
+        for (CtType<?> type : typesB ) {
+            
+            Set<CtTypeReference<?>> internalReferences = type.getReferencedTypes().stream()
+            .filter(r -> !r.isPrimitive()) // No primitive types
+            .filter(r -> r.getTypeDeclaration() != null && r.getTypeDeclaration().getPackage() != null) // Null pointer prevention
+            .filter(r -> r.getTypeDeclaration().getPackage().getQualifiedName().startsWith(pckA.getQualifiedName())) // Internal reference check
+            .filter(r -> typesA.stream().anyMatch(t -> r.getDeclaration().equals(t)))
+            .collect(Collectors.toSet());
+            // 
+            // System.out.println(String.format("Type %s references: ", type.getQualifiedName()));
+            // internalReferences.forEach(r -> System.out.println(String.format("    %s", r.getQualifiedName())));
+
+            interEdgeCount += internalReferences.size();
+        }
+
         int nodeCountA = typesA.size();
         int nodeCountB = typesB.size();
         
@@ -118,6 +133,7 @@ public class App {
 
         interconnectivityMean = interconnectivityMean / ((packages.size() * (packages.size() - 1)) / 2);
 
+        System.out.println(String.format("Modular quality: %.2f - %.2f", intraconnectivityMean, interconnectivityMean));
         return intraconnectivityMean - interconnectivityMean;
     }
 
