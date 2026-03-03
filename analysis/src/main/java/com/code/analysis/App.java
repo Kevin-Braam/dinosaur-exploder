@@ -2,8 +2,10 @@ package com.code.analysis;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import spoon.Launcher;
@@ -35,7 +37,9 @@ public class App {
     }
 
     private static double computeIntraconnectivity(CtPackage pck) {
-        Set<CtType<?>> types = pck.getTypes();
+        List<CtType> types = pck.getElements(new TypeFilter<>(CtType.class)).stream().filter(t -> !t.isAnonymous()).toList();
+        // System.out.println("Package %s: " + pck.getSimpleName());
+        // types.forEach(t -> System.out.println("  " + t.getQualifiedName()));
 
         int edgeCount = 0;
         for (CtType<?> type : types) {
@@ -43,6 +47,7 @@ public class App {
             .filter(r -> !r.isPrimitive()) // No primitive types
             .filter(r -> r.getTypeDeclaration() != null && r.getTypeDeclaration().getPackage() != null) // Null pointer prevention
             .filter(r -> r.getTypeDeclaration().getPackage().getQualifiedName().startsWith(pck.getQualifiedName())) // Internal reference check
+            .filter(r -> types.stream().anyMatch(t -> r.getDeclaration().equals(t)))
             .collect(Collectors.toSet());
 
             // Uncomment to see what is counted
@@ -50,8 +55,11 @@ public class App {
             // internalReferences.forEach(r -> System.out.println(String.format("    %s", r.getQualifiedName())));
             
             edgeCount += internalReferences.size();
+            edgeCount -= 1; // Don't count the self loop
         }
 
-        return ((double) edgeCount) / (types.size()*types.size());
+        int nodeCount = types.size();
+        // System.out.println(String.format("Edge: %d; Node: %d;", edgeCount, nodeCount));
+        return ((double) edgeCount) / (nodeCount * nodeCount);
     }
 }
