@@ -23,6 +23,7 @@ public class App {
     public static void main(String[] args) {
         // Build the AST of the dinosaur repo
         Launcher launcher = new Launcher();
+        launcher.getEnvironment().setComplianceLevel(17);
         launcher.addInputResource("../dinosaur/src/main/java");
         launcher.getEnvironment().setNoClasspath(true);
 
